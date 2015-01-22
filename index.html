@@ -1,0 +1,120 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+
+</head>
+<body>
+
+
+    <div id = "input">
+        <input type="text" id= "first_name" placeholder = "First Name">
+        <input type="text" id = "last_name" placeholder = "Last Name">
+        <button>Click me</button>
+    </div>
+
+    <p></p>
+
+
+    <script>
+        var button = document.querySelector('button');
+
+        button.addEventListener('click', function(){
+            var input_first = document.getElementById('first_name');
+            var input_last = document.getElementById('last_name');
+            var name = input_first.value.trim();
+            var last = input_last.value.trim();
+            input_first.value = "";
+            input_last.value = "";
+            
+
+        var url = 'https://congress.api.sunlightfoundation.com/legislators?fields=twitter_id,first_name,middle_name,last_name,bioguide_id&query='  + name +  '&query=' + last + '&apikey=[API Key]';
+
+
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener('load', function(e) {
+        // xhr.responseText - this is what get's the shit
+        var d = xhr.responseText;
+        var parsed = JSON.parse(d);
+
+        console.log(parsed);
+        var first_name = parsed.results[0].first_name;
+        var middle_name = parsed.results[0].middle_name;
+        var last_name = parsed.results[0].last_name;
+        var twitter = parsed.results[0].twitter_id;
+        var bioguide_id = parsed.results[0].bioguide_id;
+
+
+
+        var full_name = first_name + " " + middle_name + " " + last_name;
+
+        var body = document.querySelector('body');
+
+        var p = document.createElement('p');
+        p.innerText = "Name: " + full_name;
+        body.appendChild(p);
+
+        var p2 = document.createElement('p');
+        p2.innerText = "Twitter: " + twitter;
+        body.appendChild(p2)
+
+        var p3 = document.createElement('p');
+        p3.innerText = "Bioguide ID: " + bioguide_id;
+        body.appendChild(p3)
+
+        // console.log(parsed);
+        console.log(full_name);
+        console.log(twitter);
+
+        //trigger and pass in bioguide_id
+        second_load(bioguide_id);
+    })
+        
+        xhr.open("GET", url);
+        xhr.send();
+
+    })
+
+
+
+        var second_load = function(bioguide){
+        var xhr = new XMLHttpRequest();
+        var url = 'https://congress.api.sunlightfoundation.com/bills?sponsor.bioguide_id=' + bioguide + '&apikey=[API KEY]';
+
+        xhr.addEventListener('load', function(e) {
+            var d = xhr.responseText;
+            var parsed = JSON.parse(d);
+
+            console.log(parsed)
+
+            var title_array = [];
+            // var short_title = parsed.results[0].short_title;
+            // var official_title = parsed.results[0].official_title;
+            var counter = 0
+            while(counter < 20 && counter < parsed['results'].length){
+            var official_title = parsed['results'][counter]['official_title'];
+            title_array.push(official_title);
+            counter++;
+            }
+
+            var body = document.querySelector('body');
+            i = 0
+            while(i < title_array.length){
+                var p = document.querySelector('p');
+                p.innerText = title_array[i];
+                body.appendChild(p);
+                i++
+            }
+
+            console.log(title_array);
+            console.log(official_title);
+         
+        })
+        xhr.open("GET", url);
+        xhr.send();
+    }       
+    </script>
+</body>
+</html>
